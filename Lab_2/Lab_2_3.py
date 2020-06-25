@@ -5,7 +5,7 @@ import os
 
 
 
-w = np.zeros((7, 25))
+w = np.zeros((5, 25))
 D = None
 Y = None
 
@@ -32,6 +32,17 @@ def net(vec):
     return(s)
 
 
+def letter_to_bin(l):
+  s = np.array(list(np.binary_repr(ord(l) - ord('a'))), dtype=float)
+  if len(s) < 5:
+    s = np.append(np.zeros(5 - len(s)), s)
+  return s
+
+def bin_to_letter(b):
+  s = chr(int(b, 2) + ord('a'))
+  return s
+
+
 # Функция, открывающая все изображения в указанной папке,
 # вычисляющая их ветор и ожидаемый ответ нейронной сети
 def get_imgs(path):
@@ -42,12 +53,9 @@ def get_imgs(path):
     img = img.flatten()
     # Оставляем только каждый третий элемент (изображение ч/б)
     vec = img[np.mod(np.arange(img.size), c) == 0]
-    yield name, vec, np.array(list(np.binary_repr(ord(name.split('.')[0]))), dtype=float)
+    yield name, vec, letter_to_bin(name.split('.')[0])
 
 
-
-
-   
 path = 'task_3/letters/'
 for _, vec, result in get_imgs(path):
   if D is None:
@@ -83,8 +91,8 @@ if len(os.listdir(path)) == 0:
 pos, neg = 0, 0
 for name, vec, result in get_imgs(path):
     answ = net(vec)
-    print('File name: {}  Net answer (adapted): {}  Net answer (original): {}'.format(name, chr(int(answ, 2)), answ))
-    if name.split('.')[0] == chr(int(answ, 2)):
+    print('File name: {}  Net answer (adapted): {}  Net answer (original): {}'.format(name, bin_to_letter(answ), answ))
+    if name.split('.')[0] == bin_to_letter(answ):
         pos += 1
     else:
         neg += 1
